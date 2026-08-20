@@ -1,0 +1,73 @@
+{
+  "name": "PortfolioReview",
+  "type": "object",
+  "properties": {
+    "summary": {
+      "type": "string"
+    },
+    "strengths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "weaknesses": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "risk_patterns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recommendations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "discipline_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "trades_analyzed": {
+      "type": "number"
+    },
+    "win_rate_snapshot": {
+      "type": "number"
+    },
+    "pnl_snapshot": {
+      "type": "number"
+    },
+    "generated_date": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "summary",
+    "generated_date"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

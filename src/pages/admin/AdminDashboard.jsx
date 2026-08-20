@@ -1,25 +1,30 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { FileText, Newspaper, LineChart, Image, Globe, Plus, ArrowRight, Activity, Eye } from "lucide-react";
+import { FileText, Newspaper, LineChart, Image, Globe, Plus, ArrowRight, Activity, Sparkles, Loader2, DatabaseZap, CheckCircle2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function AdminDashboard() {
   const [data, setData] = useState({ papers: [], news: [], trades: [], charts: [], pulses: [] });
   const [loading, setLoading] = useState(true);
+  const [seeding, setSeeding] = useState(false);
+  const [seedMsg, setSeedMsg] = useState("");
+  const [reviewing, setReviewing] = useState(false);
+  const [reviewMsg, setReviewMsg] = useState("");
 
-  useEffect(() => {
-    (async () => {
-      const [papers, news, trades, charts, pulses] = await Promise.all([
-        base44.entities.Paper.list("-created_date", 100),
-        base44.entities.NewsItem.list("-created_date", 100),
-        base44.entities.Trade.list("-open_date", 100),
-        base44.entities.ChartAnalysis.list("-created_date", 100),
-        base44.entities.MarketPulse.list("-created_date", 100),
-      ].map((p) => p.catch(() => [])));
-      setData({ papers, news, trades, charts, pulses });
-      setLoading(false);
-    })();
-  }, []);
+  const load = async () => {
+    const [papers, news, trades, charts, pulses] = await Promise.all([
+      base44.entities.Paper.list("-created_date", 100),
+      base44.entities.NewsItem.list("-created_date", 100),
+      base44.entities.Trade.list("-open_date", 100),
+      base44.entities.ChartAnalysis.list("-created_date", 100),
+      base44.entities.MarketPulse.list("-created_date", 100),
+    ].map((p) => p.catch(() => [])));
+    setData({ papers, news, trades, charts, pulses });
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, []);
 
   const openCount = data.trades.filter((t) => t.status === "open").length;
   const cards = [
@@ -29,6 +34,57 @@ export default function AdminDashboard() {
     { label: "Analisi grafici", value: data.charts.length, icon: Image, to: "/admin/charts" },
     { label: "Market Pulse", value: data.pulses.length, icon: Globe, to: "/admin/markets" },
   ];
+
+  const seedDemoContent = async (force = false) => {
+    setSeeding(true);
+    setSeedMsg("");
+    try {
+      const res = await base44.functions.invoke("SeedDemoContent", { force });
+      if (res.data?.skipped) {
+        setSeedMsg("Ci sono già contenuti nel database. Rilancia con conferma per aggiungere comunque i demo.");
+      } else {
+        const c = res.data?.created || {};
+        setSeedMsg(`Creati: ${c.papers ?? 0} paper, ${c.trades ?? 0} trade, ${c.news ?? 0} notizie, ${c.market_pulse ?? 0} punti mercato.`);
+        load();
+      }
+    } catch (e) {
+      setSeedMsg("Errore durante la generazione dei contenuti demo.");
+    } finally {
+      setSeeding(false);
+    }
+  };
+
+  const generatePortfolioReview = async () => {
+    setReviewing(true);
+    setReviewMsg("");
+    try {
+      const trades = await base44.entities.Trade.list("-open_date", 200);
+      const res = await base44.functions.invoke("AnalyzePortfolio", { trades });
+      const a = res.data?.analysis;
+      const snap = res.data?.snapshot || {};
+      if (a) {
+        await base44.entities.PortfolioReview.create({
+          summary: a.summary,
+          strengths: a.strengths || [],
+          weaknesses: a.weaknesses || [],
+          risk_patterns: a.risk_patterns || [],
+          recommendations: a.recommendations || [],
+          discipline_score: a.discipline_score,
+          trades_analyzed: snap.trades_analyzed,
+          win_rate_snapshot: snap.win_rate_snapshot,
+          pnl_snapshot: snap.pnl_snapshot,
+          generated_date: new Date().toISOString(),
+        });
+        setReviewMsg("Revisione AI generata e pubblicata sulla pagina Portafoglio.");
+      } else {
+        setReviewMsg("Nessuna analisi restituita: servono almeno alcuni trade chiusi.");
+      }
+    } catch (e) {
+      setReviewMsg("Errore durante la generazione della revisione.");
+    } finally {
+      setReviewing(false);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -52,6 +108,28 @@ export default function AdminDashboard() {
             </Link>
           );
         })}
+      </div>
+
+      <div className="rounded-xl border border-border bg-card p-5">
+        <div className="flex items-center gap-2 mb-1"><DatabaseZap className="h-4 w-4 text-accent" /><h2 className="font-heading text-lg font-semibold">Azioni rapide AI</h2></div>
+        <p className="text-sm text-muted-foreground mb-4">Strumenti per popolare il sito con contenuti dimostrativi realistici e generare analisi automatiche.</p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="rounded-lg border border-border p-4">
+            <p className="text-sm font-semibold">Popola contenuti dimostrativi</p>
+            <p className="text-xs text-muted-foreground mt-1 mb-3">Aggiunge 6 paper, 10 trade, 10 notizie e 14 punti Market Pulse realistici, così il sito non appare vuoto ai visitatori. Non sovrascrive nulla di esistente salvo conferma.</p>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" disabled={seeding} onClick={() => seedDemoContent(false)} className="inline-flex items-center gap-1.5">{seeding ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />} Genera contenuti demo</Button>
+              {seedMsg?.includes("già contenuti") && <Button size="sm" variant="ghost" disabled={seeding} onClick={() => seedDemoContent(true)}>Forza comunque</Button>}
+            </div>
+            {seedMsg && <p className="text-xs text-muted-foreground mt-2 inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-accent shrink-0" /> {seedMsg}</p>}
+          </div>
+          <div className="rounded-lg border border-border p-4">
+            <p className="text-sm font-semibold">Revisione AI del portafoglio</p>
+            <p className="text-xs text-muted-foreground mt-1 mb-3">Analizza i trade chiusi e genera una revisione comportamentale (punti di forza, debolezze, rischi ricorrenti) pubblicata sulla pagina Portafoglio.</p>
+            <Button size="sm" variant="outline" disabled={reviewing} onClick={generatePortfolioReview} className="inline-flex items-center gap-1.5">{reviewing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Activity className="h-3.5 w-3.5" />} Genera revisione</Button>
+            {reviewMsg && <p className="text-xs text-muted-foreground mt-2">{reviewMsg}</p>}
+          </div>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">

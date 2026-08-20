@@ -34,6 +34,64 @@
         "failed"
       ],
       "default": "analyzing"
+    },
+    "trend_bias": {
+      "type": "string",
+      "enum": [
+        "bullish",
+        "bearish",
+        "neutral",
+        "volatile"
+      ],
+      "default": "neutral"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "summary": {
+      "type": "string"
+    },
+    "support_levels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "resistance_levels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "patterns": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "very high"
+      ],
+      "default": "medium"
+    },
+    "bullish_trigger": {
+      "type": "string"
+    },
+    "bullish_target": {
+      "type": "string"
+    },
+    "bearish_trigger": {
+      "type": "string"
+    },
+    "bearish_invalidation": {
+      "type": "string"
     }
   },
   "required": [
@@ -42,9 +100,14 @@
   ],
   "rls": {
     "read": {
-      "user_condition": {
-        "role": "admin"
-      }
+      "$or": [
+        {
+          "data.status": "completed"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
     },
     "create": {
       "user_condition": {

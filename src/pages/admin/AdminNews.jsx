@@ -5,13 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Newspaper, Sparkles, Loader2, Star } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 
 const cats = ["Macro", "Equities", "Rates", "FX", "Commodities", "Crypto", "Geopolitics"];
 const regions = ["Global", "North America", "Europe", "Asia", "Emerging Markets", "LatAm"];
-const blank = { title: "", summary: "", content: "", source: "", category: "Macro", region: "Global", importance: 3, is_featured: false, is_published: true, image_url: "", ai_analysis: "", sentiment: "neutral", key_points: [] };
+const blank = { title: "", summary: "", content: "", source: "", category: "Macro", region: "Global", importance: 3, is_featured: false, is_published: true, image_url: "", ai_analysis: "", sentiment: "neutral", key_points: [], confidence: null, market_impact_score: null, impact_horizon: "", affected_assets: [], risk_factors: [], historical_parallel: "" };
 
 export default function AdminNews() {
   const [items, setItems] = useState([]);
@@ -47,14 +47,26 @@ export default function AdminNews() {
     try {
       const res = await base44.functions.invoke("AnalyzeNews", { text });
       const a = res.data.analysis || {};
-      setForm((f) => ({ ...f, ai_analysis: a.deep_analysis || f.ai_analysis, sentiment: a.sentiment || f.sentiment, key_points: a.key_points || [] }));
+      setForm((f) => ({
+        ...f,
+        ai_analysis: a.deep_analysis || f.ai_analysis,
+        sentiment: a.sentiment || f.sentiment,
+        key_points: a.key_points || [],
+        confidence: a.confidence ?? f.confidence,
+        market_impact_score: a.market_impact_score ?? f.market_impact_score,
+        impact_horizon: a.impact_horizon || f.impact_horizon,
+        affected_assets: a.affected_assets || f.affected_assets,
+        risk_factors: a.risk_factors || f.risk_factors,
+        historical_parallel: a.historical_parallel || f.historical_parallel,
+      }));
     } finally { setAnalyzing(false); }
   };
 
   const save = async () => {
     setSaving(true);
     try {
-      const payload = { ...form, importance: Number(form.importance), published_date: form.is_published && !form.published_date ? new Date().toISOString() : form.published_date };
+      const num = (v) => (v === "" || v == null ? null : Number(v));
+      const payload = { ...form, importance: Number(form.importance), confidence: num(form.confidence), market_impact_score: num(form.market_impact_score), published_date: form.is_published && !form.published_date ? new Date().toISOString() : form.published_date };
       if (editing) await base44.entities.NewsItem.update(editing, payload);
       else await base44.entities.NewsItem.create(payload);
       setOpen(false); load();
@@ -132,7 +144,25 @@ export default function AdminNews() {
                 <p className="text-xs font-semibold text-accent inline-flex items-center gap-1.5"><Sparkles className="h-3.5 w-3.5" /> Analisi Deep Learning</p>
                 <Button variant="outline" size="sm" onClick={analyze} disabled={analyzing} className="inline-flex items-center gap-1.5">{analyzing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />} Analizza</Button>
               </div>
-              {form.ai_analysis ? <p className="text-sm text-foreground/80 whitespace-pre-wrap">{form.ai_analysis}</p> : <p className="text-xs text-muted-foreground">Clicca "Analizza" per generare l'analisi AI sulla notizia.</p>}
+              {form.ai_analysis ? (
+                <div className="space-y-3">
+                  {(form.confidence != null || form.market_impact_score != null || form.impact_horizon) && (
+                    <div className="flex flex-wrap gap-4 text-xs">
+                      {form.confidence != null && <span>Confidenza: <strong className="text-foreground">{form.confidence}%</strong></span>}
+                      {form.market_impact_score != null && <span>Impatto: <strong className="text-foreground">{form.market_impact_score}/10</strong></span>}
+                      {form.impact_horizon && <span>Orizzonte: <strong className="text-foreground">{form.impact_horizon}</strong></span>}
+                    </div>
+                  )}
+                  <p className="text-sm text-foreground/80 whitespace-pre-wrap">{form.ai_analysis}</p>
+                  {form.affected_assets?.length > 0 && <p className="text-xs text-muted-foreground">Asset coinvolti: {form.affected_assets.join(", ")}</p>}
+                  {form.risk_factors?.length > 0 && (
+                    <ul className="text-xs text-foreground/70 list-disc pl-5 space-y-0.5">
+                      {form.risk_factors.map((r, i) => <li key={i}>{r}</li>)}
+                    </ul>
+                  )}
+                  {form.historical_parallel && <p className="text-xs text-muted-foreground italic">Precedente storico: {form.historical_parallel}</p>}
+                </div>
+              ) : <p className="text-xs text-muted-foreground">Clicca "Analizza" per generare l'analisi AI sulla notizia.</p>}
             </div>
           </div>
           <div className="flex gap-2 pt-2">

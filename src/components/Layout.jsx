@@ -9,6 +9,7 @@ const nav = [
   { to: "/papers", label: "Pubblicazioni" },
   { to: "/portfolio", label: "Portafoglio" },
   { to: "/markets", label: "Mercati" },
+  { to: "/charts", label: "Chart Lab" },
 ];
 
 function Footer() {

@@ -19,6 +19,7 @@ import Papers from '@/pages/Papers';
 import PaperDetail from '@/pages/PaperDetail';
 import Portfolio from '@/pages/Portfolio';
 import MarketPulse from '@/pages/MarketPulse';
+import ChartLab from '@/pages/ChartLab';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import AdminPapers from '@/pages/admin/AdminPapers';
 import AdminPaperEditor from '@/pages/admin/AdminPaperEditor';
@@ -60,6 +61,7 @@ const AuthenticatedApp = () => {
         <Route path="/papers/:id" element={<PaperDetail />} />
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/markets" element={<MarketPulse />} />
+        <Route path="/charts" element={<ChartLab />} />
       </Route>
       {/* Auth */}
       <Route path="/login" element={<Login />} />
