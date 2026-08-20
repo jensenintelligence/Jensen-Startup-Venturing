@@ -1,0 +1,111 @@
+{
+  "name": "Trade",
+  "type": "object",
+  "properties": {
+    "instrument": {
+      "type": "string"
+    },
+    "instrument_type": {
+      "type": "string",
+      "enum": [
+        "Equity",
+        "ETF",
+        "Derivative",
+        "Option",
+        "Future",
+        "Forex",
+        "Commodity",
+        "Crypto",
+        "Bond"
+      ],
+      "default": "Equity"
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "long",
+        "short"
+      ],
+      "default": "long"
+    },
+    "entry_price": {
+      "type": "number"
+    },
+    "exit_price": {
+      "type": "number"
+    },
+    "position_size": {
+      "type": "number"
+    },
+    "open_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "close_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "closed"
+      ],
+      "default": "open"
+    },
+    "pnl": {
+      "type": "number"
+    },
+    "pnl_percent": {
+      "type": "number"
+    },
+    "thesis": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "lessons": {
+      "type": "string"
+    },
+    "screenshot_url": {
+      "type": "string"
+    },
+    "strategy": {
+      "type": "string"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "very high"
+      ],
+      "default": "medium"
+    }
+  },
+  "required": [
+    "instrument",
+    "direction",
+    "status"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "name": "ChartAnalysis",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "ai_analysis": {
+      "type": "string"
+    },
+    "market_context": {
+      "type": "string"
+    },
+    "instrument": {
+      "type": "string"
+    },
+    "timeframe": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "analyzing",
+        "completed",
+        "failed"
+      ],
+      "default": "analyzing"
+    }
+  },
+  "required": [
+    "title",
+    "image_url"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

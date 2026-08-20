@@ -1,0 +1,94 @@
+{
+  "name": "Paper",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "abstract": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Macro",
+        "Derivatives",
+        "Short Selling",
+        "Alternative Assets",
+        "Quantitative",
+        "Market Structure"
+      ],
+      "default": "Macro"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "published"
+      ],
+      "default": "draft"
+    },
+    "published_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "cover_image": {
+      "type": "string"
+    },
+    "reading_time_min": {
+      "type": "number"
+    },
+    "featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "author_note": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "abstract",
+    "content",
+    "category"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.status": "published"
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

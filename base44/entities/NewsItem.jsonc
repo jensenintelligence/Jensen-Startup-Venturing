@@ -1,0 +1,114 @@
+{
+  "name": "NewsItem",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "content": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Macro",
+        "Equities",
+        "Rates",
+        "FX",
+        "Commodities",
+        "Crypto",
+        "Geopolitics"
+      ],
+      "default": "Macro"
+    },
+    "region": {
+      "type": "string",
+      "enum": [
+        "Global",
+        "North America",
+        "Europe",
+        "Asia",
+        "Emerging Markets",
+        "LatAm"
+      ],
+      "default": "Global"
+    },
+    "importance": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 5,
+      "default": 3
+    },
+    "is_featured": {
+      "type": "boolean",
+      "default": false
+    },
+    "is_published": {
+      "type": "boolean",
+      "default": true
+    },
+    "published_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "image_url": {
+      "type": "string"
+    },
+    "ai_analysis": {
+      "type": "string"
+    },
+    "sentiment": {
+      "type": "string",
+      "enum": [
+        "bullish",
+        "bearish",
+        "neutral"
+      ],
+      "default": "neutral"
+    },
+    "key_points": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "title",
+    "summary",
+    "category"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "data.is_published": true
+        },
+        {
+          "created_by_id": "{{user.id}}"
+        }
+      ]
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

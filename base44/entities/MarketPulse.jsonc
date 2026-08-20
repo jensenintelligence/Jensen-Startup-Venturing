@@ -1,0 +1,78 @@
+{
+  "name": "MarketPulse",
+  "type": "object",
+  "properties": {
+    "region": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "lat": {
+      "type": "number"
+    },
+    "lng": {
+      "type": "number"
+    },
+    "headline": {
+      "type": "string"
+    },
+    "sentiment": {
+      "type": "string",
+      "enum": [
+        "bullish",
+        "bearish",
+        "neutral",
+        "volatile"
+      ],
+      "default": "neutral"
+    },
+    "indicator_name": {
+      "type": "string"
+    },
+    "indicator_value": {
+      "type": "string"
+    },
+    "change_percent": {
+      "type": "number"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "Equities",
+        "Rates",
+        "FX",
+        "Commodities",
+        "Crypto",
+        "Macro"
+      ],
+      "default": "Equities"
+    }
+  },
+  "required": [
+    "region",
+    "headline",
+    "sentiment"
+  ],
+  "rls": {
+    "read": {},
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}
