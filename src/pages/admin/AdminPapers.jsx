@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
-import { Plus, Pencil, Trash2, FileText } from "lucide-react";
+import { Plus, Pencil, Trash2, FileText, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EmptyState from "@/components/EmptyState";
 
 export default function AdminPapers() {
   const [papers, setPapers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [q, setQ] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -27,9 +28,15 @@ export default function AdminPapers() {
     load();
   };
 
+  const filtered = useMemo(() => {
+    if (!q.trim()) return papers;
+    const needle = q.trim().toLowerCase();
+    return papers.filter((p) => (p.title || "").toLowerCase().includes(needle) || (p.category || "").toLowerCase().includes(needle));
+  }, [papers, q]);
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="font-heading text-3xl font-semibold">Pubblicazioni</h1>
           <p className="text-muted-foreground mt-1">Scrivi e gestisci i paper di ricerca.</p>
@@ -37,11 +44,18 @@ export default function AdminPapers() {
         <Link to="/admin/papers/new"><Button className="inline-flex items-center gap-2"><Plus className="h-4 w-4" /> Nuovo paper</Button></Link>
       </div>
 
+      {papers.length > 0 && (
+        <div className="relative max-w-sm">
+          <Search className="h-4 w-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cerca per titolo o categoria…" className="w-full h-10 pl-9 pr-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring" />
+        </div>
+      )}
+
       {loading ? (
         <div className="h-8 w-8 border-4 border-muted border-t-accent rounded-full animate-spin" />
-      ) : papers.length ? (
+      ) : filtered.length ? (
         <div className="rounded-xl border border-border bg-card divide-y divide-border">
-          {papers.map((p) => (
+          {filtered.map((p) => (
             <div key={p.id} className="flex items-center gap-4 p-4">
               <FileText className="h-5 w-5 text-muted-foreground shrink-0" />
               <div className="flex-1 min-w-0">

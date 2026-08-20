@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Save, Upload, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Upload, Loader2, Wand2 } from "lucide-react";
 
 const categories = ["Macro", "Derivatives", "Short Selling", "Alternative Assets", "Quantitative", "Market Structure"];
 
@@ -46,6 +46,12 @@ export default function AdminPaperEditor() {
   }, [id]);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  const estimateReadingTime = () => {
+    const text = (form.content || "").replace(/<[^>]+>/g, " ");
+    const words = text.trim().split(/\s+/).filter(Boolean).length;
+    set("reading_time_min", Math.max(1, Math.round(words / 200)));
+  };
 
   const onCover = async (e) => {
     const file = e.target.files?.[0];
@@ -112,7 +118,10 @@ export default function AdminPaperEditor() {
           </div>
           <div>
             <Label>Tempo di lettura (min)</Label>
-            <Input type="number" value={form.reading_time_min} onChange={(e) => set("reading_time_min", e.target.value)} className="mt-1.5" />
+            <div className="flex gap-2 mt-1.5">
+              <Input type="number" value={form.reading_time_min} onChange={(e) => set("reading_time_min", e.target.value)} />
+              <Button type="button" variant="outline" size="icon" title="Calcola dal contenuto" onClick={estimateReadingTime}><Wand2 className="h-4 w-4" /></Button>
+            </div>
           </div>
         </div>
         <div>
